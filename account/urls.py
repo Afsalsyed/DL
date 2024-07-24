@@ -4,6 +4,7 @@ from .views import *
 from django.contrib.auth import views as auth_views 
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from oss.views import Draftview
+from dl.views import bridge
 
 urlpatterns = [
     path('',register, name='register'),
@@ -32,6 +33,8 @@ urlpatterns = [
     #logout
     path('logout/',custom_logout, name='logout'),
     #login redirect
-    path('', Draftview, name='draft')
+    path('', Draftview, name='draft'),
+    #dl
+    path('', bridge, name='bridge'),
 ]
  

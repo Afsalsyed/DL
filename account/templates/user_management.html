@@ -191,11 +191,18 @@
                                 </tr>
                             {% endif %}
                         {% endfor %}
-                    </tbody>
-                    
-                    
-                    
+                    </tbody>  
                 </table>
+            </div>
+            <!--Publication Management-->
+            <br>
+            <h2>Publication Management</h2>
+            <br>
+            <!-- Publication Buttons -->
+            <div id="publicationButtons" class="d-flex flex-wrap">
+                {% for journal in journals %}
+                    <button type="button" class="btn btn-secondary m-2 journal-btn" data-journal-id="{{ journal.id }}">{{ journal.title }}</button>
+                {% endfor %}
             </div>
         </main>
     </div>
@@ -311,6 +318,7 @@
 
 
 
+
  <!-- my new Scripts -->
     <!-- Include jQuery and Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -326,6 +334,29 @@
 var journal_usernames = {{ journal_usernames|safe }};  // Ensure this is properly formatted as JSON
 
 $(document).ready(function() {
+    $('.journal-btn').click(function() {
+        var journalId = $(this).data('journal-id');
+        $.ajax({
+            url: '{% url "bridge" %}',  // URL of the view to handle the request
+            method: 'POST',
+            data: {
+                'journal_id': journalId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token for security
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.href = response.redirect_url;  // Redirect to the new page
+                } else {
+                    console.error('Error:', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error sending journal data:', error);
+            }
+        });
+    });
+
+
     // Handle Search 
     $('#searchForm').on('submit', function(e) {
         e.preventDefault();

@@ -23,7 +23,7 @@ urlpatterns = [
     path('submission/<int:submission_id>/view_proof/',view_proof, name='view_proof'),
     path('submission_step_six/<int:submission_id>/', submission_step_six, name='submission_step_six'),
     #test
-    path('submission/<int:submission_id>/add-authors-institutions/', add_authors_institutions, name='add_authors_institutions'),
+    # path('submission/<int:submission_id>/add-authors-institutions/', add_authors_institutions, name='add_authors_institutions'),
     #logout
     path('logout/', custom_logout, name='logout'),
     #ajax

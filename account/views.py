@@ -206,10 +206,12 @@ def create_user(request):
 
 def user_management(request):
     users = User.objects.all()
+    
     journal_usernames = list(User.objects.filter(groups__name__in=['AE', 'AIC']).values_list('username', flat=True))
     context = {
         'users': users,
         'journal_usernames': json.dumps(journal_usernames),  # Convert list to JSON string
+        'journals' : Journal.objects.all()
     }
     return render(request, 'user_management.html', context)
 
