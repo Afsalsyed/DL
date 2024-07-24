@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .custom-label {
+        font-size: 18px;
+    }
+    .custom-select {
+        font-size: 16px;
+    }
+
+    /* Additional styling as needed */
+</style>
+
+<!-- Sign up Section Start -->
+<div class="signup-section ptb-60">
+    <div class="container">
+        <form class="signup-form" method="post" id="userRegistrationForm">
+            {% csrf_token %}
+            <h2 align=center> Create an account</h2><br>
+            <br>
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label class="custom-label">Title</label>
+                        {{ form.title }}
+                    </div><br>
+
+                    <br><div class="form-group">
+                        <label class="custom-label">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">Institution / Affiliation</label>
+                        {{ form.institution }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">City</label>
+                        {{ form.city }}
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label class="custom-label">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">Enter Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    
+
+                    <div class="form-group">
+                        <label class="custom-label">Address</label>
+                        {{ form.address }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">State</label>
+                        {{ form.state }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label class="custom-label">Country</label>
+                        {{ form.country }}
+                    </div><br>
+
+                    <br><div class="form-group">
+                        <label class="custom-label">Zipcode</label>
+                        {{ form.zipcode }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">Scopus id</label>
+                        {{ form.scopus_id }}
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label class="custom-label">Mobile Number</label>
+                        {{ form.mobile_no }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="custom-label">Orcid id</label>
+                        {{ form.orcid_id }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="signup-btn text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var orcidInput = document.getElementById('id_orcid_id');
+
+    orcidInput.addEventListener('input', function() {
+        var value = this.value.replace(/[\W_]/g, ''); // Remove non-word characters (letters, digits, underscore)
+        var formattedValue = '';
+        
+        // Format with dashes after every four characters
+        for (var i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) {
+                formattedValue += '-';
+            }
+            formattedValue += value[i];
+        }
+        
+        this.value = formattedValue;
+    });
+});
+</script>
+{% endblock %}
+
+
+

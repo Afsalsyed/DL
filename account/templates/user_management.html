@@ -1,0 +1,602 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+ 
+<style>
+    /* Sidebar Styles */
+    .sidebar {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-right: 1px solid #dee2e6;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .sidebar .nav-link.active {
+        color: #ffc107;
+        background-color: #055160;
+    }
+
+    .sidebar .nav-link {
+        font-size: 1rem;
+        color: #495057;
+        padding: 0.75rem 1rem;
+    }
+
+    .sidebar .nav-link:hover {
+        color: #ffc107;
+        background-color: #055160;
+    }
+
+    .sidebar .nav-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar .nav-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Modal Styles */
+    .modal-dialog {
+        max-width: 600px;
+    }
+
+    /* Custom Button Colors */
+    .btn-generate {
+        background-color:#055160; 
+        color: #fff;
+    }
+
+    .btn-generate:hover {
+        background-color: #055160; 
+        color: #fff;
+    }
+
+    .btn-reset {
+        background-color: #055160; 
+        color: #fff;
+    }
+
+    .btn-reset:hover {
+        background-color: #055160; 
+        color: #fff;
+    }
+
+    .btn-save {
+        background-color: #055160; /* Primary color */
+        color: #fff;
+    }
+
+    .btn-save:hover {
+        background-color: #055160; /* Darker primary color */
+        color: #fff;
+    }
+
+    /* Optional: If you want to add padding to the buttons */
+    .modal-footer .btn {
+        padding: 0.5rem 1rem;
+    }
+
+    .roles-link {
+        color: #076eff;
+    }
+
+    .reset-password-link {
+        color: #077bff;
+    }
+
+    /* Search Box Styles */
+
+#searchInput {
+    width: 300px; 
+    height: 45px; 
+    font-size: 16px; 
+}
+
+#searchForm .btn-primary {
+    background-color: #055160;
+    border-color: #055160; 
+    color: #ffc107; 
+}
+
+/* Change the button color on hover */
+#searchForm .btn-primary:hover {
+    background-color: #055160; /* Darker background color on hover */
+    border-color: #055160; /* Darker border color on hover */
+}
+
+/* Adjust the space between the input and the button */
+#searchForm .me-2 {
+    margin-right: 10px; /* Adjust the margin as needed */
+}
+/* Create User Button */
+.btn-save {
+    background-color: #055160; /* Background color */
+    border-color: #055160; /* Border color */
+    color: #ffc107; /* Text color */
+}
+
+/* Button color on hover */
+.btn-save:hover {
+    background-color: #043d4e; /* Darker background color on hover */
+    border-color: #043d4e; /* Darker border color on hover */
+}
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            User Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <br>
+            <h2>User Management</h2>
+            <br>
+            <!-- Search Box -->
+            <div class="d-flex mb-3">
+                <form id="searchForm" class="d-flex me-2">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by First Name or Username">
+                    <button type="submit" class="btn btn-primary ms-2">Search</button>
+                </form>
+            </div>
+            
+            
+
+            <div class="d-flex justify-content-end mb-3">
+                <!-- Create User Button -->
+                <button type="button" class="btn btn-save" data-bs-toggle="modal" data-bs-target="#createUserModal">Create User</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>User Name</th>
+                            <th>Roles</th>
+                            <th>Reset Password</th>
+                            <th>Journal</th> <!-- New column -->
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for user in users %}
+                            {% if not user.is_superuser %}
+                                <tr>
+                                    <td>{{ user.first_name }}</td>
+                                    <td>{{ user.last_name }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td><a href="#" class="roles-link" data-username="{{ user.username }}">Roles</a></td>
+                                    <td><a href="#" class="reset-password-link" data-username="{{ user.username }}" data-email="{{ user.email }}">Reset Password</a></td>
+                                    <td>
+                                        {% if user.username in journal_usernames %}
+                                        <a href="#" class="journal-link" data-username="{{ user.username }}">Journals</a>
+                                        
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                    
+                    
+                    
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Roles Modal -->
+<div class="modal fade" id="rolesModal" tabindex="-1" role="dialog" aria-labelledby="rolesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rolesModalLabel">Manage Roles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rolesForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="username" id="rolesUsername">
+                    <div id="rolesCheckboxes"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="saveRolesButton">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="resetPasswordForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="username" id="resetUsername">
+                    <input type="hidden" name="email" id="resetEmail">
+                    <div class="mb-3">
+                        <label for="resetUsernameField" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="resetUsernameField" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="text" class="form-control" id="newPassword" readonly>
+                    </div>
+                    <button type="button" class="btn btn-generate" id="generatePasswordButton">Generate New Password</button>
+                    <button type="button" class="btn btn-reset" id="resetPasswordButton">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Create User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="first_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="last_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isActive" name="is_active" checked>
+                        <label class="form-check-label" for="isActive">
+                            Active
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="createUserButton">Create User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Journal Modal -->
+<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="journalModalLabel">Assign Journal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modal-username">
+                <div id="journal-radio-buttons"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="save-journal" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+ <!-- my new Scripts -->
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+<!-- Include the JavaScript for user management -->
+<script src="{% static 'js/user_management.js' %}"></script>
+
+<script>
+
+
+
+var journal_usernames = {{ journal_usernames|safe }};  // Ensure this is properly formatted as JSON
+
+$(document).ready(function() {
+    // Handle Search 
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        var searchQuery = $('#searchInput').val().trim();
+
+        $.ajax({
+            url: '{% url "search_users" %}',  // Ensure this URL is correctly set up in urls.py
+            method: 'GET',
+            data: { 'query': searchQuery },
+            success: function(data) {
+                $('#userTableBody').empty();
+                data.users.forEach(function(user) {
+                    if (!user.is_superuser) {
+                        $('#userTableBody').append(`
+                            <tr>
+                                <td>${user.first_name}</td>
+                                <td>${user.last_name}</td>
+                                <td>${user.username}</td>
+                                <td><a href="#" class="roles-link" data-username="${user.username}">Roles</a></td>
+                                <td><a href="#" class="reset-password-link" data-username="${user.username}" data-email="${user.email}">Reset Password</a></td>
+                                <td>
+                                    ${journal_usernames.includes(user.username) ? '<a href="#" class="journal-link" data-username="' + user.username + '">Journals</a>' : '-'}
+                                </td>
+                            </tr>
+                        `);
+                    }
+                });
+                
+
+//  populate roles
+                $('.roles-link').on('click', function(e) {
+                    e.preventDefault();
+                    var username = $(this).data('username');
+                    $('#rolesUsername').val(username);
+                    $.ajax({
+                        url: '{% url "fetch_groups" %}',
+                        method: 'GET',
+                        data: { 'username': username },
+                        success: function(data) {
+                            var checkboxes = '';
+                            data.groups.forEach(function(group) {
+                                if (group.name.toLowerCase() !== 'author') { // Exclude "author" group
+                                    checkboxes += '<div class="form-check">';
+                                    checkboxes += '<input class="form-check-input" type="checkbox" value="' + group.id + '" id="group' + group.id + '" name="groups"';
+                                    if (data.user_groups.includes(group.id)) {
+                                        checkboxes += ' checked';
+                                    }
+                                    checkboxes += '>';
+                                    checkboxes += '<label class="form-check-label" for="group' + group.id + '">' + group.name + '</label>';
+                                    checkboxes += '</div>';
+                                }
+                            });
+                            $('#rolesCheckboxes').html(checkboxes);
+                            $('#rolesModal').modal('show');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("An error occurred: " + error);
+                        }
+                    });
+                });
+
+// save Roles
+                $('#saveRolesButton').on('click', function() {
+                    var username = $('#rolesUsername').val();
+                    var groups = [];
+                    $('input[name="groups"]:checked').each(function() {
+                        groups.push($(this).val());
+                    });
+                    $.ajax({
+                        url: '{% url "update_user_groups" %}',
+                        method: 'POST',
+                        data: {
+                            'username': username,
+                            'groups': groups,
+                            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+                        },
+                        success: function(data) {
+                            location.reload();
+                            $('#rolesModal').modal('hide');
+                            location.reload();
+                            // Optionally refresh the page or show a success message
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("An error occurred: " + error);
+                        }
+                    });
+                });
+
+                // Ensure the modal is properly initialized
+                $('#rolesModal').on('hidden.bs.modal', function () {
+                    $('#rolesCheckboxes').html('');
+                });
+// reset password
+                $('.reset-password-link').on('click', function(e) {
+                    e.preventDefault();
+                    var username = $(this).data('username');
+                    var email = $(this).data('email');
+                    $('#resetUsername').val(username);
+                    $('#resetUsernameField').val(username);  // Display the username in the modal
+                    $('#resetEmail').val(email);
+                    $('#newPassword').val('');
+                    $('#resetPasswordModal').modal('show');
+                });
+
+                // Generate New Password Button Click Event
+                $('#generatePasswordButton').on('click', function() {
+                    var newPassword = generateRandomPassword();
+                    $('#newPassword').val(newPassword);
+                });
+
+                // Reset Password Button Click Event
+                $('#resetPasswordButton').on('click', function() {
+                    var username = $('#resetUsername').val();
+                    var newPassword = $('#newPassword').val();
+                    var email = $('#resetEmail').val();
+                    $.ajax({
+                        url: '{% url "reset_user_password" %}',
+                        method: 'POST',
+                        data: {
+                            'username': username,
+                            'new_password': newPassword,
+                            'email': email,
+                            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+                        },
+                        success: function(data) {
+                            if (data.success) {
+                                $('#resetPasswordModal').modal('hide');
+                                alert('Password reset successfully and email sent.');
+                                location.reload();  // Reload the page
+                            } else {
+                                console.error('Error: ' + data.error);
+                                alert('Error: ' + data.error);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error: ' + error);
+                            alert('An error occurred. Please try again later.');
+                        }
+                    });
+                });
+
+                
+            
+                function generateRandomPassword(length = 12) {
+                    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';
+                    var password = '';
+                    for (var i = 0; i < length; i++) {
+                        password += characters.charAt(Math.floor(Math.random() * characters.length));
+                    }
+                    return password;
+                }
+        
+
+
+
+// journals
+                $(document).on('click', '.journal-link', function() {
+                var username = $(this).data('username');
+
+                if (username) {
+                    $.ajax({
+                        url: '{% url "get_journals" %}',
+                        type: 'GET',
+                        data: { username: username },
+                        success: function(response) {
+                            $('#journal-radio-buttons').empty();
+
+                            response.journals.forEach(journal => {
+                                $('#journal-radio-buttons').append(`
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="journal" id="journal-${journal.id}" value="${journal.id}">
+                                        <label class="form-check-label" for="journal-${journal.id}">
+                                            ${journal.title}
+                                        </label>
+                                    </div>
+                                `);
+                            });
+
+                            if (response.selected_journal) {
+                                $(`#journal-${response.selected_journal}`).prop('checked', true);
+                            }
+
+                            $('#modal-username').val(username);
+                            $('#journalModal').modal('show');
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.error('Failed to fetch journals:', errmsg);
+                        }
+                    });
+                } else {
+                    console.error('Username is not defined.');
+                }
+            });
+// save journals
+            $('#save-journal').on('click', function() {
+                var selectedJournal = $('input[name="journal"]:checked').val();
+                var username = $('#modal-username').val();
+                
+                if (!selectedJournal) {
+                    alert('Please select a journal.');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '{% url "assign_journal" %}',
+                    type: 'POST',
+                    data: {
+                        username: username,
+                        journal_id: selectedJournal,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Journal assigned successfully!');
+                            $('#journalModal').modal('hide');
+                        } else {
+                            alert('Failed to assign journal: ' + response.error);
+                        }
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.error('Failed to assign journal:', errmsg);
+                    }
+                });
+            });
+        }
+    });
+    
+});
+});
+$('#searchForm')[0].reset();
+
+        $(document).ready(function() {
+        // Create User Button Click Event
+        $('#createUserButton').on('click', function() {
+            var firstName = $('#firstName').val();
+            var lastName = $('#lastName').val();
+            var email = $('#email').val();
+            var isActive = $('#isActive').is(':checked');
+            $.ajax({
+                url: '{% url "create_user" %}',  
+                method: 'POST',
+                data: {
+                    'first_name': firstName,
+                    'last_name': lastName,
+                    'email': email,
+                    'is_active': isActive,
+                    'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+                },
+                success: function(data) {
+                    if (data.success) {
+                        $('#createUserModal').modal('hide');
+                        alert('User created successfully.');
+                        $('#createUserForm')[0].reset();
+                        location.reload();  
+                    } else {
+                        console.error('Error: ' + data.error);
+                        alert('Error: ' + data.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error: ', xhr.responseText);
+                    alert('An error occurred: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+
+
+
+
+
