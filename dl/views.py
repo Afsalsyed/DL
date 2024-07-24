@@ -18,7 +18,7 @@ def bridge(request):
             # Process the journal data as needed
 
             # Assuming you have a URL pattern named 'journal_detail' to display journal details
-            redirect_url = reverse('journal_detail', args=[journal_id])
+            redirect_url = reverse('volume_page', args=[journal_id])
             return JsonResponse({'status': 'success', 'redirect_url': redirect_url})
         except Journal.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Journal not found'})
