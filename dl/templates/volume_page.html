@@ -42,8 +42,10 @@
 
 <!-- Content -->
 <div class="container mt-4">
-    <h1>Volumes for Journal: {{ journal.title }}</h1>
-    <button id="addVolumeButton" class="btn btn-primary mb-3">Add Volume</button>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-0">Volumes for Journal: {{ journal.title }}</h1>
+        <button id="addVolumeButton" class="btn btn-primary mb-3">Add Volume</button>
+    </div>
     
     <!-- Volume Table -->
     <table class="table table-bordered">
@@ -112,7 +114,6 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
  <script>
     $(document).ready(function() {
-        // Show the modal for adding a new volume
         $('#addVolumeButton').click(function() {
             $('#volumeModalLabel').text('Add Volume');
             $('#volumeId').val('');
@@ -121,15 +122,14 @@
             $('#yearField').val('');
             $('#volumeModal').modal('show');
         });
-
-        // Show the modal for editing an existing volume
+    
         $('.editVolumeButton').click(function() {
             var row = $(this).closest('tr');
             var id = row.data('id');
             var volume = row.find('td').eq(0).text();
             var description = row.find('td').eq(1).text();
             var year = row.find('td').eq(2).text();
-
+    
             $('#volumeModalLabel').text('Edit Volume');
             $('#volumeId').val(id);
             $('#volumeField').val(volume);
@@ -137,30 +137,40 @@
             $('#yearField').val(year);
             $('#volumeModal').modal('show');
         });
-
-        // Handle form submission for adding/editing a volume
+    
         $('#volumeForm').submit(function(e) {
             e.preventDefault();
-
+    
             var id = $('#volumeId').val();
             var volume = $('#volumeField').val();
             var description = $('#descriptionField').val();
             var year = $('#yearField').val();
-
+            var journalId = "{{ journal.id }}";  // Include the journal ID in the data
+    
+            console.log('Data to be sent:', {
+                'id': id,
+                'volume': volume,
+                'description': description,
+                'year': year,
+                'journal_id': journalId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            });
+    
             $.ajax({
-                url: id ? "{% url 'edit_volume' %}" : "{% url 'add_volume' %}",  // Adjust URL according to your view names
+                url: id ? "{% url 'edit_volume' %}" : "{% url 'add_volume' %}",
                 type: 'POST',
                 data: {
                     'id': id,
                     'volume': volume,
                     'description': description,
                     'year': year,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // CSRF token for security
+                    'journal_id': journalId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(response) {
+                    console.log('Server response:', response);  // Log the server response
                     if (response.success) {
-                        // Reload or update the table
-                        location.reload();  // You might want to update this with AJAX response
+                        location.reload();
                     } else {
                         alert('An error occurred.');
                     }
@@ -169,6 +179,7 @@
             });
         });
     });
+    
 </script>
 {% endblock content %}
 
