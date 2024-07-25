@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from oss.models import Journal 
 from .models import *
 from django.urls import reverse
-
+from .forms import *
 # Create your views here.
 
 #from accounts to DL
@@ -26,16 +26,9 @@ def bridge(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
-def journal_detail(request, pk):
-    journal = get_object_or_404(Journal, pk=pk)
-    context = {
-        'journal': journal
-    }
-    return render(request, 'test.html', context)
-
 def volume_page(request, journal_id):
     journal = get_object_or_404(Journal, id=journal_id)
-    volumes = Volume.objects.filter(journal=journal)
+    volumes = Volume.objects.filter(journal=journal).order_by('-id')
     context = {
         'journal': journal,
         'volumes': volumes,
@@ -44,13 +37,11 @@ def volume_page(request, journal_id):
 
 def add_volume(request):
     if request.method == 'POST':
-        print(request.POST)
         volume = request.POST.get('volume')
         description = request.POST.get('description')
         year = request.POST.get('year')
         journal_id = request.POST.get('journal_id')
         journal = get_object_or_404(Journal, id=journal_id)
-        print(journal)
 
         Volume.objects.create(volume=volume, description=description, year=year, journal=journal)
         return JsonResponse({'success': True})
@@ -74,13 +65,40 @@ def edit_volume(request):
 
 
 #***********************************************
-def issues_page(request):
-    # Render the issues page template
-    return render(request, 'issue_page.html')
+def issue_list(request):
+    issues = Issue.objects.all().order_by('-id')
+    volumes = Volume.objects.all()  # Get all volumes
+    return render(request, 'issue_list.html', {'issues': issues, 'volumes': volumes})
+
+def save_issue(request):
+    if request.method == 'POST':
+        issue_id = request.POST.get('issueId')
+        form = IssueForm(request.POST)
+
+        if form.is_valid():
+            if issue_id:  # Update existing issue
+                issue = Issue.objects.get(id=issue_id)
+                form = IssueForm(request.POST, instance=issue)
+            else:  # Create new issue
+                issue = form.save(commit=False)
+
+            issue = form.save()  # Save the issue
+
+            return JsonResponse({
+                'success': True,
+                'issue': {
+                    'id': issue.id,
+                    'issue': issue.issue,
+                    'volume': issue.volume.volume,  # Assuming you want the volume number
+                    'description': issue.description,
+                }
+            })
+
+    return JsonResponse({'success': False, 'error': 'Invalid form data'})
 
 
 
 #***********************************************************
-def articles_page(request):
+def article_page(request):
     # Render the articles page template
     return render(request, 'article_page.html')

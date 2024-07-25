@@ -11,7 +11,7 @@ class Volume(models.Model):
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.volume
+        return str(self.volume)
 
 class Issue(models.Model):
     issue = models.IntegerField()
@@ -20,5 +20,5 @@ class Issue(models.Model):
     
 
     def __str__(self):
-        return self.issue
+        return str(self.issue)
 

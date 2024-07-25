@@ -8,9 +8,10 @@ urlpatterns = [
     path('add_volume/', add_volume, name='add_volume'),
     path('edit_volume/', edit_volume, name='edit_volume'),
     #Issue
-    path('issues_page/<int:journal_id>/', issues_page, name='issues_page'),
+    path('issues/', issue_list, name='issue_list'),
+    path('issues/save/', save_issue, name='save_issue'),
     #Article
-    path('articles_page/<int:journal_id>/', articles_page, name='articles_page'),
+    path('articles_page/', article_page, name='articles_page'),
  
 
 

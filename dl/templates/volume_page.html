@@ -31,10 +31,10 @@
                 <a class="nav-link active" href="{% url 'volume_page' journal.id %}" id="volume-link">Volume</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'issues_page' journal.id %}" id="issues-link">Issues</a>
+                <a class="nav-link" href="{% url 'issue_list' %}" id="issues-link">Issues</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Articles</a>
+                <a class="nav-link" href="{% url 'articles_page'  %}" id="articles-link">Articles</a>
             </li>
         </ul>
     </div>
@@ -112,7 +112,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
- <script>
+<script>
     $(document).ready(function() {
         $('#addVolumeButton').click(function() {
             $('#volumeModalLabel').text('Add Volume');
@@ -147,14 +147,6 @@
             var year = $('#yearField').val();
             var journalId = "{{ journal.id }}";  // Include the journal ID in the data
     
-            console.log('Data to be sent:', {
-                'id': id,
-                'volume': volume,
-                'description': description,
-                'year': year,
-                'journal_id': journalId,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
-            });
     
             $.ajax({
                 url: id ? "{% url 'edit_volume' %}" : "{% url 'add_volume' %}",
@@ -168,7 +160,6 @@
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(response) {
-                    console.log('Server response:', response);  // Log the server response
                     if (response.success) {
                         location.reload();
                     } else {
@@ -178,8 +169,7 @@
                 }
             });
         });
-    });
-    
+    });   
 </script>
 {% endblock content %}
 

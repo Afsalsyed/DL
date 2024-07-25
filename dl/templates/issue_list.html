@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<style>
+    .navbar-custom {
+        background-color: #044d5e;
+    }
+    .navbar-custom .navbar-nav .nav-link {
+        color: white;
+        margin: 0 15px; /* Add spacing between links */
+    }
+    .navbar-custom .navbar-nav .nav-link:hover,
+    .navbar-custom .navbar-nav .nav-link.active {
+        color: #eabf1c; /* Change color on hover and active */
+    }
+    .navbar-custom .navbar-nav {
+        margin: auto; /* Center the navbar items */
+    }
+
+</style>
+<br>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link " href="{% url 'volume_page' 1 %}" id="volume-link">Volume</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'issue_list' %}" id="issues-link">Issues</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'articles_page' %}" id="articles-link">Articles</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Content -->
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Issue Management</h2>
+        <button class="btn btn-primary float-end" id="addIssueBtn">Add Issue</button>
+    </div>
+    <table class="table table-bordered" id="issueTable">
+        <thead>
+            <tr>
+                <th>Issue</th>
+                <th>Volume</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr data-id="{{ issue.id }}">
+                <td>{{ issue.issue }}</td>
+                <td data-volume-id="{{ issue.volume.id }}">{{ issue.volume.volume }}</td>
+                <td>{{ issue.description }}</td>
+                <td>
+                    <button class="btn btn-warning editBtn">Edit</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="issueModal" tabindex="-1" aria-labelledby="issueModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="issueModalLabel">Add/Edit Issue</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="issueForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="issueId" name="issueId">
+                    <div class="mb-3">
+                        <label for="issue" class="form-label">Issue</label>
+                        <input type="text" class="form-control" id="issue" name="issue" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="volume" class="form-label">Volume</label>
+                        <select class="form-select" id="volume" name="volume" required>
+                            <option value="" disabled selected>Select a volume</option>
+                            {% for volume in volumes %}
+                                <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Add Issue button click
+    $('#addIssueBtn').click(function() {
+        $('#issueId').val('');
+        $('#issue').val('');
+        $('#volume').val('');
+        $('#description').val('');
+        $('#issueModal').modal('show');
+    });
+
+    // Event delegation for Edit button click
+    $('#issueTable').on('click', '.editBtn', function() {
+        const row = $(this).closest('tr');
+        const issueId = row.data('id');
+        const issueText = row.find('td:eq(0)').text();
+        const volumeId = row.find('td[data-volume-id]').data('volume-id'); // Get volume ID
+        const descriptionText = row.find('td:eq(2)').text();
+
+        $('#issueId').val(issueId);
+        $('#issue').val(issueText);
+        $('#volume').val(volumeId); // Set volume id
+        $('#description').val(descriptionText);
+        $('#issueModal').modal('show');
+    });
+
+    // Form submission
+    $('#issueForm').submit(function(event) {
+        event.preventDefault();
+        const formData = $(this).serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "save_issue" %}',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    const newRow = `<tr data-id="${response.issue.id}">
+                        <td>${response.issue.issue}</td>
+                        <td data-volume-id="${response.issue.volume}">${response.issue.volume}</td>
+                        <td>${response.issue.description}</td>
+                        <td><button class="btn btn-warning editBtn">Edit</button></td>
+                    </tr>`;
+
+                    if ($('#issueId').val()) {
+                        // Update existing row
+                        const row = $('#issueTable tr[data-id="' + $('#issueId').val() + '"]');
+                        row.replaceWith(newRow);
+                    } else {
+                        // Add new row to the top
+                        $('#issueTable tbody').prepend(newRow);
+                    }
+                    $('#issueModal').modal('hide');
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            },
+            error: function(xhr) {
+                alert('Error: ' + xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+{% endblock content %}
