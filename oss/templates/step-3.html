@@ -144,12 +144,7 @@
                                             <tr style="border-bottom: 1px solid #ddd !important;">
                                                 <td style="border-right: none !important;">{{ keyword.keyword }}</td>
                                                 <td style="border-right: none !important;">
-                                                    <form method="post">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="action" value="remove">
-                                                        <input type="hidden" name="keyword_id" value="{{ keyword.id }}">
-                                                        <button type="submit">Remove</button>
-                                                    </form>
+                                                    <button class="remove-keyword" data-id="{{ keyword.id }}">Remove</button>
                                                 </td>
                                             </tr>
                                             {% empty %}
@@ -243,7 +238,6 @@ $(document).ready(function() {
     });
 });
 </script>
-
 
 
 <script>

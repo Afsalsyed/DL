@@ -105,6 +105,7 @@ def keyword(request, submission_id):
             
         elif action == 'remove':
             keyword_id = request.POST.get('keyword_id')
+            print(keyword_id)
             Keyword.objects.filter(id=keyword_id, submission=submission).delete()
             return JsonResponse({'success': True, 'keyword_id': keyword_id})
         
