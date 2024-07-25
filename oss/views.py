@@ -11,11 +11,7 @@ from account.models import Author
 @login_required
 def Draftview(request):
     submissions = Submission.objects.filter(article_status__article_status='Draft', author=request.user)
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
 
     if request.method =="POST":
         action = request.POST.get('action')
@@ -26,11 +22,7 @@ def Draftview(request):
             return redirect('draft')
     return render(request, 'draftview.html', {
         'submissions': submissions,
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 
@@ -38,88 +30,48 @@ def Draftview(request):
 @login_required
 def Submittedview(request):
     submissions = Submission.objects.filter(article_status__article_status='Submitted', author=request.user)
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
     return render(request, 'submittedview.html', {
         'submissions': submissions,
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 #New submission start
 @login_required
 def startnew(request):
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
     return render(request,'start-new-submission.html',{
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 #Revision menu
 @login_required
 def Revisionview(request):
     submissions = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user)
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
     return render(request,'revisionview.html', {
         'submissions': submissions,
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 #Accepted menu
 @login_required
 def Acceptedview(request):
     submissions = Submission.objects.filter(decision__decision='Accepted', author=request.user)
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
     return render(request,'acceptedview.html', {
         'submissions': submissions,
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 #Rejected menu
 @login_required
 def Rejectedview(request):
     submissions = Submission.objects.filter(decision__decision='Rejected', author=request.user)
-    has_draft = Submission.objects.filter(article_status__article_status='Draft', author=request.user).exists()
-    has_submitted = Submission.objects.filter(article_status__article_status='Submitted', author=request.user).exists()
-    has_revision = Submission.objects.filter(article_status__article_status__in=['Minimum Revision' , 'Maximum Revision'], author=request.user).exists()
-    has_accepted = Submission.objects.filter(decision__decision='Accepted', author=request.user).exists()
-    has_rejected = Submission.objects.filter(decision__decision='Rejected', author=request.user).exists()
+    submission_statuses = check_submission_status(request.user)
     return render(request,'rejectedview.html', {
         'submissions': submissions,
-        'has_draft':has_draft,
-        'has_submitted': has_submitted,
-        'has_revision': has_revision,
-        'has_accepted': has_accepted,
-        'has_rejected': has_rejected,
+        **submission_statuses,
     })
 
 #Step-1
@@ -516,3 +468,15 @@ def submission_step_six(request, submission_id):
             # Redirect to a confirmation page or wherever needed
             return redirect('submitted')  # Replace 'confirmation_page' with your actual URL name
     return render(request, 'step-6.html', {'submission': submission})
+
+
+#*****************************************************************************
+#Author dashboard avail checker
+def check_submission_status(author):
+    return {
+        'has_draft': Submission.objects.filter(article_status__article_status='Draft', author=author).exists(),
+        'has_submitted': Submission.objects.filter(article_status__article_status='Submitted', author=author).exists(),
+        'has_revision': Submission.objects.filter(article_status__article_status__in=['Minimum Revision', 'Maximum Revision'], author=author).exists(),
+        'has_accepted': Submission.objects.filter(decision__decision='Accepted', author=author).exists(),
+        'has_rejected': Submission.objects.filter(decision__decision='Rejected', author=author).exists(),
+    }
