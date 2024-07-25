@@ -233,11 +233,7 @@ def step6_review_submit(request, submission_id):
         empty_fields.append('Number of Tables')
     if not submission.no_of_words:
         empty_fields.append('Number of Words')
-    if not submission.is_submitted_already:
-        empty_fields.append('Previously Submitted')
-    if not submission.conflict_of_interest:
-        empty_fields.append('Conflict of Interest')
-    if not submission.coi_describe:
+    if not submission.coi_describe and submission.conflict_of_interest ==1  :
         empty_fields.append('Conflict of Interest Description')
     if not submission.category:
         empty_fields.append('Category')
@@ -251,9 +247,10 @@ def step6_review_submit(request, submission_id):
         empty_fields.append('Keywords')
     if not coauthors.exists():
         empty_fields.append('Co-Authors')
-    if not funder:
-        empty_fields.append('Funder')
-
+    if submission.is_funded == 1 and funder == None:
+        empty_fields.append('Funder information')
+    if submission.is_funded == 1 and submission.is_funded == 0:
+        empty_fields.append(' is Funded')
 
     form = ReviewSubmitForm(initial={
             'title': submission.title,

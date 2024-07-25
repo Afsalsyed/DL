@@ -500,11 +500,11 @@
                     <form method="post" enctype="multipart/form-data" action="{% url 'submission_step_six' submission.id %}">
                         {% csrf_token %}
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="confirmViewProofCheckbox">
-                            <label class="form-check-label" for="confirmViewProofCheckbox">I have viewed the proof</label>
+                            <input type="checkbox" class="form-check-input" id="confirmViewProofCheckbox" disabled>
+                            <label class="form-check-label" for="confirmViewProofCheckbox" >I have viewed the proof</label>
                         </div>
                         <div class="form-group">
-                            <button type="button" id="viewProofButton" class="btn btn-secondary">View Proof</button>
+                            <button type="button" id="viewProofButton" class="btn btn-secondary" {% if empty_fields %} disabled {% endif %}>View Proof</button>
                             <button type="submit" id="submitButton" name="action" value="submit" class="btn btn-success" disabled>Submit</button>
                         </div>
                     </form>
@@ -524,6 +524,7 @@
         viewProofButton.addEventListener('click', function() {
             // Open the merged PDF file in a new window when View Proof button is clicked
             window.open(viewProofUrl, '_blank', 'location=0');
+            confirmViewProofCheckbox.disabled = false; 
         });
     
         confirmViewProofCheckbox.addEventListener('change', function() {

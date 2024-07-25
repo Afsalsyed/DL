@@ -200,6 +200,7 @@ $(document).ready(function() {
             success: function(response) {
                 console.log("Add response:", response);
                 if (response.success) {
+                    $('tbody tr:contains("No keywords added yet.")').remove();
                     var newRow = `<tr style="border-bottom: 1px solid #ddd !important;">
                                     <td style="border-right: none !important;">${response.keyword}</td>
                                     <td style="border-right: none !important;">
@@ -232,6 +233,14 @@ $(document).ready(function() {
                 console.log("Remove response:", response);
                 if (response.success) {
                     $(`button[data-id="${response.keyword_id}"]`).closest('tr').remove();
+                    var rowCount = $('tbody tr').length;
+                    if (rowCount === 0) {
+                    // If no rows, append the "No keywords added yet." message
+                    var noKeywordsRow = `<tr>
+                                            <td>No keywords added yet.</td>
+                                        </tr>`;
+                    $('tbody').append(noKeywordsRow);
+                }
                 }
             }
         });

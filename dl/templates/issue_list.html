@@ -92,7 +92,7 @@
                         <select class="form-select" id="volume" name="volume" required>
                             <option value="" disabled selected>Select a volume</option>
                             {% for volume in volumes %}
-                                <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }})</option>
+                                <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }}-{{volume.journal.title}})</option>
                             {% endfor %}
                         </select>
                     </div><br>

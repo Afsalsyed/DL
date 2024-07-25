@@ -60,7 +60,7 @@
                     <div class="section">
                         <h3>Cover Letter</h3>
                         <div class="form-group">
-                            <input type=textarea class="form-control" id="cover_letter" name="cover_letter" rows="4" placeholder="Write your cover letter..."></input>
+                            <input type=textarea class="form-control" id="cover_letter" {% if submission.cover_letter %} value="{{submission.cover_letter}}"{% endif %} name="cover_letter" rows="4" placeholder="Write your cover letter..." required></input>
                         </div>
                     </div>
 
@@ -68,17 +68,22 @@
                     <div class="section">
                         <h3>Funding</h3>
                         <p><strong>Is there funding to report for this submission?</strong></p>
-                        <div class="form-group">
+                        {% comment %} <div class="form-group">
                             <label><input type="radio" name="is_funded" value="1" {% if submission.is_funded %}checked{% endif %}> Yes</label>
                             <label><input type="radio" name="is_funded" value="0" {% if not submission.is_funded %}checked{% endif %}> No</label>
+                        </div> {% endcomment %}
+                        <div class="form-group">
+                            <label><input type="radio" name="is_funded" value="1" {% if submission.is_funded == 1 %}checked{% endif %}> Yes</label>
+                            <label><input type="radio" name="is_funded" value="0" {% if submission.is_funded == 0 %}checked{% endif %}> No</label>
                         </div>
-                
-                        <div class="funders-section" {% if not submission.is_funded %}style="display:none;"{% endif %}>
+                        
+                        <div class="funders-section" {% if submission.is_funded == 1 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
                             <h4>Funder Information</h4>
                             <div class="funder-form">
                                 {{ funder_form.as_p }}
                             </div>
                         </div>
+                        
                     </div>
 
                     <!-- Manuscript Information Section -->
@@ -86,15 +91,15 @@
                         <h3>Manuscript Information</h3>
                         <div class="form-group">
                             <label for="figures">Number of Figures:</label>
-                            <input type="number" name="no_of_figures" id="no_of_figures" class="form-control" required>
+                            <input type="number" name="no_of_figures" id="no_of_figures" class="form-control" value="{{submission.no_of_figures}}" required>
                         </div>
                         <div class="form-group">
                             <label for="tables">Number of Tables:</label>
-                            <input type="number" name="no_of_tables" id="no_of_tables" class="form-control" required>
+                            <input type="number" name="no_of_tables" id="no_of_tables" class="form-control" value="{{submission.no_of_tables}}" required>
                         </div>
                         <div class="form-group">
                             <label for="words">Number of Words:</label>
-                            <input type="number" name="no_of_words" id="no_of_words" class="form-control" required>
+                            <input type="number" name="no_of_words" id="no_of_words" class="form-control" value="{{submission.no_of_words}}" required>
                         </div>
                     </div>
 
@@ -102,8 +107,8 @@
                     <div class="section">
                         <h3>Has this manuscript been submitted previously?</h3>
                         <div class="form-group">
-                            <label><input type="radio" name="is_submitted_already" value="1"> Yes</label>
-                            <label><input type="radio" name="is_submitted_already" value="0"> No</label>
+                            <label><input type="radio" name="is_submitted_already" value="1" {% if submission.is_submitted_already == 1 %}checked{% endif %}> Yes</label>
+                            <label><input type="radio" name="is_submitted_already" value="0" {% if submission.is_submitted_already == 0 %}checked{% endif %}> No</label>
                         </div>
                     </div>
 
@@ -111,9 +116,9 @@
                     <div class="section">
                         <h3>Confirmations</h3>
                         <div class="form-group">
-                            <label><input type="checkbox" name="acknowledgement_1"> ACK 1</label><br>
-                            <label><input type="checkbox" name="acknowledgement_2"> ACK 2</label><br>
-                            <label><input type="checkbox" name="acknowledgement_3"> ACK 3</label>
+                            <label><input type="checkbox" name="acknowledgement_1" {% if submission.acknowledgement_1 == 1 %}checked{% endif %}> ACK 1</label><br>
+                            <label><input type="checkbox" name="acknowledgement_2" {% if submission.acknowledgement_2 == 1 %}checked{% endif %}> ACK 2</label><br>
+                            <label><input type="checkbox" name="acknowledgement_3" {% if submission.acknowledgement_3 == 1 %}checked{% endif %}> ACK 3</label>
                         </div>
                     </div>
 
@@ -121,12 +126,12 @@
                     <div class="section">
                         <h3>Conflict of Interest</h3>
                         <div class="form-group">
-                            <label><input type="radio" name="conflict_of_interest" value="1"> Yes</label>
-                            <label><input type="radio" name="conflict_of_interest" value="0"> No</label>
+                            <label><input type="radio" name="conflict_of_interest" value="1" {% if submission.conflict_of_interest == 1 %}checked{% endif %}> Yes</label>
+                            <label><input type="radio" name="conflict_of_interest" value="0" {% if submission.conflict_of_interest == 0 %}checked{% endif %}> No</label>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" >
                             <label for="coi_describe">Describe:</label><br>
-                            <textarea id="coi_describe" name="coi_describe" rows="4" class="form-control"></textarea>
+                            <textarea id="coi_describe" name="coi_describe" rows="4" class="form-control" placeholder="Describe your conflict of interest"></textarea>
                         </div>
                     </div>
 

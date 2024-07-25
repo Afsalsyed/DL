@@ -5,7 +5,7 @@ from oss.models import Journal
 
 
 class Volume(models.Model):
-    volume = models.IntegerField()
+    volume = models.IntegerField(unique=True)
     description = models.CharField(max_length=255)
     year = models.IntegerField()
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE)

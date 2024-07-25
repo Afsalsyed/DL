@@ -44,7 +44,7 @@ class SubmissionForm(forms.ModelForm):
     is_funded = forms.TypedChoiceField(
         choices=((0, 'No'), (1, 'Yes')),
         coerce=lambda x: bool(int(x)),
-        required=True
+        required=True,
     )
     
     is_submitted_already = forms.TypedChoiceField(
