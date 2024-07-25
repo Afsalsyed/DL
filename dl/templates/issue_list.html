@@ -2,7 +2,7 @@
 
 
 {% block content %}
-
+{% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"> {% endcomment %}
 <style>
     .navbar-custom {
         background-color: #044d5e;
@@ -88,14 +88,14 @@
                         <input type="text" class="form-control" id="issue" name="issue" required>
                     </div>
                     <div class="mb-3">
-                        <label for="volume" class="form-label">Volume</label>
+                        <label for="volume" class="form-label">Volume</label><br>
                         <select class="form-select" id="volume" name="volume" required>
                             <option value="" disabled selected>Select a volume</option>
                             {% for volume in volumes %}
                                 <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }})</option>
                             {% endfor %}
                         </select>
-                    </div>
+                    </div><br>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" required></textarea>
