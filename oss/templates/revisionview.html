@@ -19,12 +19,22 @@
                                 <li><a href="#">
                                     <h3 style="color:white">Author Dashboard</h3>
                                 </a></li>
+                                {% if has_draft %}
                                 <li><a href="{% url 'draft' %}">Manuscripts in draft</a></li>
+                                {% endif %}
+                                {% if has_submitted %}
                                 <li><a href="{% url 'submitted' %}">Manuscripts submitted</a></li>
-                                <li><a href="{% url 'startnew' %}">Start New Submission</a></li>
+                                {% endif %}
+                                {% if has_revision %}
                                 <li><a href="{% url 'revision' %}" class="active">Manuscript waiting for revision</a></li>
+                                {% endif %}
+                                {% if has_accepted %}
                                 <li><a href="{% url 'accepted' %}">Manuscript Accepted</a></li>
+                                {% endif %}
+                                {% if has_rejected %}
                                 <li><a href="{% url 'rejected' %}">Manuscript Rejected</a></li>
+                                {% endif %}
+                                <li><a href="{% url 'startnew' %}">Start New Submission</a></li>
                             </ul>
                         </div>
                     </div>
