@@ -81,6 +81,16 @@ def submission_step_one(request, submission_id):
     if submission_id:
         try:
             submission = Submission.objects.get(id=submission_id)
+            # Check if the article status requires starting a new submission
+            if submission.article_status.article_status in ['Minimum Revision', 'Maximum Revision']:
+                # Create a new submission based on the existing one
+                new_submission = Submission(author=submission.author)
+                new_submission.parent_submission_id = submission.id
+                new_submission.manuscript_id = f"MSS-{submission.author.id}-{Submission.objects.count() + 1}"
+                new_submission.article_status_id = get_object_or_404(Article_Status, article_status="Draft").id
+                new_submission.save()
+                request.session['submission_id'] = new_submission.id
+                return redirect('new_submission', submission_id=new_submission.id)
         except Submission.DoesNotExist:
             submission_id = None
 
@@ -89,11 +99,14 @@ def submission_step_one(request, submission_id):
         if form.is_valid():
             submission = form.save(commit=False)
             submission.author = request.user
+            
             if not submission.manuscript_id:
                 submission.manuscript_id = f"MSS-{submission.author.id}-{Submission.objects.count() + 1}"
-                submission.article_status_id=get_object_or_404(Article_Status, article_status="Draft").id
+                submission.article_status_id = get_object_or_404(Article_Status, article_status="Draft").id
+            
             submission.save()
             request.session['submission_id'] = submission.id
+            
             if 'save_and_continue' in request.POST:
                 return redirect('submission_step_two', submission_id=submission.id)
             else:
@@ -101,7 +114,7 @@ def submission_step_one(request, submission_id):
                     'form': form,
                     'article_types': Article_Type.objects.all(),
                     'categories': Category.objects.all(),
-                    'journals' : Journal.objects.all(),
+                    'journals': Journal.objects.all(),
                     'saved': True
                 })
     else:
@@ -111,7 +124,7 @@ def submission_step_one(request, submission_id):
         'form': form,
         'article_types': Article_Type.objects.all(),
         'categories': Category.objects.all(),
-        'journals' : Journal.objects.all(),
+        'journals': Journal.objects.all(),
     })
 
 #Step-3
@@ -146,12 +159,6 @@ def keyword(request, submission_id):
 @login_required
 def add_authors_institutions(request, submission_id):
     submission = get_object_or_404(Submission, id=submission_id)
-    # current_author = Author.objects.get(user=request.user)
-    # to display author if logged in as admin
-    # try:
-    #     current_author = Author.objects.get(user=request.user)
-    # except Author.DoesNotExist:
-    #     current_author = None
     coauthor_form = CoAuthorForm()
 
     if request.method == "POST":
@@ -480,3 +487,4 @@ def check_submission_status(author):
         'has_accepted': Submission.objects.filter(decision__decision='Accepted', author=author).exists(),
         'has_rejected': Submission.objects.filter(decision__decision='Rejected', author=author).exists(),
     }
+

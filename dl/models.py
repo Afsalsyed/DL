@@ -22,3 +22,8 @@ class Issue(models.Model):
     def __str__(self):
         return str(self.issue)
 
+# class Published_article(models.Model):
+#     corrected_submission = models.ForeignKey("app.Model", on_delete=models.CASCADE)
+#     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
+#     published_on_date = models.DateField()
+#     doi = models.CharField(max_length=255)

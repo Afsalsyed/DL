@@ -50,7 +50,7 @@ def login_view(request):
                 if user.is_superuser:
                     return redirect('user_management')  # Redirect to user_management.html
                 else:
-                    return redirect('draft')  # Or another view for regular users
+                    return redirect('startnew')  # Or another view for regular users
             else:
                 form.add_error(None, 'Invalid username or password')
     else:

@@ -41,7 +41,7 @@
                     <div class="col-md-9" style="text-align:left;">
                         <div class="job-style-two job-list-section">
                             <div class="section-title-space">
-                                <h2>Submitted Manuscripts</h2>
+                                <h2>Accepted Manuscripts</h2>
                             </div>
                             <div class="author-card-step-two">
                                 <div class="row">
@@ -58,6 +58,11 @@
                                     <div class="col-md-2">
                                         <div class="author-card-info">
                                             <h3>TITLE</h3>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="author-card-info">
+                                            <h3>JOURNAL</h3>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
@@ -83,6 +88,9 @@
                                     </div>
                                     <div class="col-md-2">
                                         <p>{{ submission.title }}</p>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <p>{{ submission.journal }}</p>
                                     </div>
                                     <div class="col-md-2">
                                         <p>{{ submission.submitted_on|date:"d-M-Y" }}</p>
