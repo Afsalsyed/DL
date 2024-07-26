@@ -1,27 +1,23 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-{% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"> {% endcomment %}
 <style>
     .navbar-custom {
         background-color: #044d5e;
     }
     .navbar-custom .navbar-nav .nav-link {
         color: white;
-        margin: 0 15px; /* Add spacing between links */
+        margin: 0 15px;
     }
     .navbar-custom .navbar-nav .nav-link:hover,
     .navbar-custom .navbar-nav .nav-link.active {
-        color: #eabf1c; /* Change color on hover and active */
+        color: #eabf1c;
     }
     .navbar-custom .navbar-nav {
-        margin: auto; /* Center the navbar items */
+        margin: auto;
     }
-
 </style>
 <br>
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-custom">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -29,22 +25,24 @@
     <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link " href="{% url 'volume_page' 1 %}" id="volume-link">Volume</a>
+                <a class="nav-link" href="{% url 'volume_page' journal.id %}" id="volume-link">Volume</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="{% url 'issue_list' %}" id="issues-link">Issues</a>
+                <a class="nav-link active" href="{% url 'issue_list' journal.id %}" id="issues-link">Issues</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'articles_page' %}" id="articles-link">Articles</a>
+                <a class="nav-link active" href="{% url 'articles_page' journal.id %}" id="articles-link">Publish Articles</a>
             </li>
+            {% comment %} <li class="nav-item">
+                <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Published Articles</a>
+            </li> {% endcomment %}
         </ul>
     </div>
 </nav>
 
-<!-- Content -->
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center">
-        <h2>Issue Management</h2>
+        <h2>Issue Management : {{journal.title}}</h2>
         <button class="btn btn-primary float-end" id="addIssueBtn">Add Issue</button>
     </div>
     <table class="table table-bordered" id="issueTable">
@@ -71,7 +69,6 @@
     </table>
 </div>
 
-<!-- Add/Edit Modal -->
 <div class="modal fade" id="issueModal" tabindex="-1" aria-labelledby="issueModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -88,14 +85,14 @@
                         <input type="text" class="form-control" id="issue" name="issue" required>
                     </div>
                     <div class="mb-3">
-                        <label for="volume" class="form-label">Volume</label><br>
+                        <label for="volume" class="form-label">Volume</label> <br>
                         <select class="form-select" id="volume" name="volume" required>
                             <option value="" disabled selected>Select a volume</option>
                             {% for volume in volumes %}
-                                <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }}-{{volume.journal.title}})</option>
+                                <option value="{{ volume.id }}">{{ volume.volume }} ({{ volume.year }})</option>
                             {% endfor %}
                         </select>
-                    </div><br>
+                    </div> <br>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" required></textarea>
@@ -111,31 +108,52 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Add Issue button click
+    function getNextIssueNumber() {
+        let maxIssueNumber = 0;
+        $('#issueTable tbody tr').each(function() {
+            const issueNumber = parseInt($(this).find('td:eq(0)').text());
+            if (!isNaN(issueNumber) && issueNumber > maxIssueNumber) {
+                maxIssueNumber = issueNumber;
+            }
+        });
+        return maxIssueNumber + 1;
+    }
+
+    function getDefaultVolumeId() {
+        let defaultVolumeId = null;
+        $('#issueTable tbody tr:first-child').each(function() {
+            defaultVolumeId = $(this).find('td[data-volume-id]').data('volume-id');
+        });
+
+        if (defaultVolumeId === null) {
+            defaultVolumeId = $('#volume option:first-child').val();
+        }
+        return defaultVolumeId;
+    }
+
     $('#addIssueBtn').click(function() {
         $('#issueId').val('');
-        $('#issue').val('');
-        $('#volume').val('');
+        $('#issue').val(getNextIssueNumber());
+        const defaultVolumeId = getDefaultVolumeId();
+        $('#volume').val(defaultVolumeId);
         $('#description').val('');
         $('#issueModal').modal('show');
     });
 
-    // Event delegation for Edit button click
     $('#issueTable').on('click', '.editBtn', function() {
         const row = $(this).closest('tr');
         const issueId = row.data('id');
         const issueText = row.find('td:eq(0)').text();
-        const volumeId = row.find('td[data-volume-id]').data('volume-id'); // Get volume ID
+        const volumeId = row.find('td[data-volume-id]').data('volume-id');
         const descriptionText = row.find('td:eq(2)').text();
 
         $('#issueId').val(issueId);
         $('#issue').val(issueText);
-        $('#volume').val(volumeId); // Set volume id
+        $('#volume').val(volumeId);
         $('#description').val(descriptionText);
         $('#issueModal').modal('show');
     });
 
-    // Form submission
     $('#issueForm').submit(function(event) {
         event.preventDefault();
         const formData = $(this).serialize();
@@ -148,17 +166,15 @@ $(document).ready(function() {
                 if (response.success) {
                     const newRow = `<tr data-id="${response.issue.id}">
                         <td>${response.issue.issue}</td>
-                        <td data-volume-id="${response.issue.volume}">${response.issue.volume}</td>
+                        <td data-volume-id="${response.issue.volume_id}">${response.issue.volume}</td>
                         <td>${response.issue.description}</td>
                         <td><button class="btn btn-warning editBtn">Edit</button></td>
                     </tr>`;
 
                     if ($('#issueId').val()) {
-                        // Update existing row
                         const row = $('#issueTable tr[data-id="' + $('#issueId').val() + '"]');
                         row.replaceWith(newRow);
                     } else {
-                        // Add new row to the top
                         $('#issueTable tbody').prepend(newRow);
                     }
                     $('#issueModal').modal('hide');
@@ -170,6 +186,11 @@ $(document).ready(function() {
                 alert('Error: ' + xhr.responseText);
             }
         });
+    });
+
+    // Reset modal on close to prevent form data persistence issues
+    $('#issueModal').on('hidden.bs.modal', function () {
+        $('#issueForm')[0].reset();
     });
 });
 </script>

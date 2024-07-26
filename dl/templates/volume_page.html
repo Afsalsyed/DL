@@ -31,11 +31,14 @@
                 <a class="nav-link active" href="{% url 'volume_page' journal.id %}" id="volume-link">Volume</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'issue_list' %}" id="issues-link">Issues</a>
+                <a class="nav-link" href="{% url 'issue_list' journal.id %}" id="issues-link">Issues</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'articles_page'  %}" id="articles-link">Articles</a>
+                <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Publish Articles</a>
             </li>
+            {% comment %} <li class="nav-item">
+                <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Published Articles</a>
+            </li> {% endcomment %}
         </ul>
     </div>
 </nav>

@@ -193,3 +193,18 @@ class Keyword(models.Model):
 
     def __str__(self):
         return self.keyword
+    
+
+
+
+class Accepted_Submission(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE)
+    corrected_file = models.FileField(upload_to='submissions/')
+    typeset_file = models.FileField(upload_to='submissions/')
+    corrected_title = models.CharField(max_length=255, null=True, blank=True)
+    corrected_abstract = models.TextField(null=True, blank=True)
+    corrected_on = models.DateField()
+    typeseted_on = models.DateField()
+    
+    def __str__(self):
+        return self.submission.title
