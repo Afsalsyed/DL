@@ -31,7 +31,7 @@
                 <a class="nav-link active" href="{% url 'issue_list' journal.id %}" id="issues-link">Issues</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="{% url 'articles_page' journal.id %}" id="articles-link">Publish Articles</a>
+                <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Publish Articles</a>
             </li>
             {% comment %} <li class="nav-item">
                 <a class="nav-link" href="{% url 'articles_page' journal.id %}" id="articles-link">Published Articles</a>
@@ -42,7 +42,7 @@
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center">
-        <h2>Issue Management : {{journal.title}}</h2>
+        <h1>Issue Management : {{journal.title}}</h1>
         <button class="btn btn-primary float-end" id="addIssueBtn">Add Issue</button>
     </div>
     <table class="table table-bordered" id="issueTable">
@@ -132,6 +132,7 @@ $(document).ready(function() {
     }
 
     $('#addIssueBtn').click(function() {
+        $('#issueModalLabel').text('Add issue');
         $('#issueId').val('');
         $('#issue').val(getNextIssueNumber());
         const defaultVolumeId = getDefaultVolumeId();
@@ -147,6 +148,7 @@ $(document).ready(function() {
         const volumeId = row.find('td[data-volume-id]').data('volume-id');
         const descriptionText = row.find('td:eq(2)').text();
 
+        $('#issueModalLabel').text('Edit issue');
         $('#issueId').val(issueId);
         $('#issue').val(issueText);
         $('#volume').val(volumeId);

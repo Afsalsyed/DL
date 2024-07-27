@@ -87,7 +87,7 @@ class Submission(models.Model):
     is_decissioned = models.BooleanField(default=False)
     decision = models.ForeignKey(Decision, on_delete=models.CASCADE, null=True, blank=True)
     final_file = models.FileField(upload_to='submissions/', null=True, blank=True)
-    admin_commments = models.TextField(null=True, blank=True)
+    admin_comments = models.TextField(null=True, blank=True)
     def __str__(self):
         return self.title or "No Title"
 
