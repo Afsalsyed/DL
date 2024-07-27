@@ -57,11 +57,11 @@
             </tr>
         </thead>
         <tbody id="submission-list">
-            {% for submission in accepted_submissions %}
+            {% for accepted_submission in accepted_submissions %}
                 <tr>
-                    <td>{{ submission.corrected_title }}</td>
+                    <td>{{ accepted_submission.corrected_title }}</td>
                     <td>
-                        <button class="btn btn-primary publish-button" data-submission-id="{{ submission.id }}">Publish</button>
+                        <button class="btn btn-primary publish-button" data-submission-id="{{ accepted_submission.id }}">Publish</button>
                     </td>
                 </tr>
             {% empty %}
@@ -134,50 +134,47 @@
     </div>
 </div>
 
-
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.0.0-beta2/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Handle publish button click
-        $('.publish-button').on('click', function() {
+        $('.publish-button').click(function() {
             const submissionId = $(this).data('submission-id');
             $('#submission-id').val(submissionId);
             $('#publishModal').modal('show');
         });
 
-        // Handle form submission
-        $('#publish-form').on('submit', function(e) {
+        $('#publish-form').submit(function(e) {
             e.preventDefault();
+
             const submissionId = $('#submission-id').val();
             const issueId = $('#issue-select').val();
             const volumeId = $('#volume-select').val();
             const publishedOn = $('#published-on').val();
+            const csrfToken = '{{ csrf_token }}';
 
-
-            // AJAX request to publish the article
             $.ajax({
-                url: '{% url "publish_article" %}',  // Update this URL with your publish article endpoint
-                method: 'POST',
+                url: "{% url 'publish_article' %}",
+                type: 'POST',
                 data: {
                     accepted_submission_id: submissionId,
                     issue_id: issueId,
                     volume_id: volumeId,
                     published_on: publishedOn,
-                    csrfmiddlewaretoken: '{{ csrf_token }}'  // Include CSRF token for security
+                    csrfmiddlewaretoken: csrfToken,
                 },
                 success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to publish the article.');
+                    }
                     $('#publishModal').modal('hide');
-                    location.reload();  // Reload the page to see the updated state
-                },
-                error: function(xhr) {
-                    alert('An error occurred. Please try again.');
                 }
             });
         });
     });
 </script>
 
-{% endblock content %}
+{% endblock %}

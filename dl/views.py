@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from oss.models import Article_Status, Journal, Accepted_Submission
+from oss.models import Article_Status, Journal, Accepted_Submission, Submission
 from .models import *
 from django.urls import reverse
 from .forms import *
@@ -105,43 +105,35 @@ def save_issue(request):
 #***********************************************************
 def article_publish_page(request, journal_id):
     journal = get_object_or_404(Journal, id=journal_id)
-    accepted_submissions = Accepted_Submission.objects.filter(submission__journal_id=journal_id)
+    accepted_submissions = Accepted_Submission.objects.filter(submission__journal=journal, submission__article_status__article_status='Proof read done')
     issues = Issue.objects.filter(volume__journal__id=journal_id).order_by('-id')  # Latest first
     volumes = Volume.objects.filter(journal_id=journal_id).order_by('-id')  # Latest first
 
-    return render(request, 'article_publish_page.html', {
+    context = {
         'journal': journal,
         'accepted_submissions': accepted_submissions,
         'issues': issues,
         'volumes': volumes,
-    })
+    }
+    return render(request, 'article_publish_page.html', context)
 
 def publish_article(request):
     if request.method == 'POST':
-        accepted_submission_id = request.POST.get('accepted_submission_id')
+        print(request.POST)
+        acceptedSubmission_id = request.POST.get('accepted_submission_id')
         issue_id = request.POST.get('issue_id')
         published_on = request.POST.get('published_on')
 
-        try:
-            accepted_submission = Accepted_Submission.objects.get(id=accepted_submission_id)
-            # Get the Article_Status instance for "Published"
-            published_status = Article_Status.objects.get(article_status='Published')
-            # Update article status to published
-            accepted_submission.submission.article_status = published_status # Set the foreign key to the Published status
-            accepted_submission.submission.save()
-
-            # Create a new Published_article instance
-            published_article = Published_article.objects.create(
-                accepted_submission_id=accepted_submission_id,
-                issue_id=issue_id,
-                published_on_date=published_on,
-                doi='your-doi-here'  # You can generate or assign a DOI as needed
-            )
-            
-            return JsonResponse({'success': True, 'message': 'Article published successfully!'})
-        except Accepted_Submission.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Accepted Submission not found.'})
-        except Article_Status.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Article Status not found.'})
-
+        accepted_submission = Accepted_Submission.objects.get(id=acceptedSubmission_id)
+        
+        published_article = Published_article.objects.create(
+            accepted_submission=accepted_submission,
+            issue=issue_id,
+            published_on_date=published_on,
+            doi='your-doi-here'  # You can generate or assign a DOI as needed
+        )
+        accepted_submission.submission.article_status = Article_Status.objects.get(article_status='Published')
+        accepted_submission.submission.save()
+        return JsonResponse({'success': True, 'message': 'Article published successfully!'})
+    
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
