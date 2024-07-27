@@ -387,3 +387,6 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+def custom_admin_redirect(request):
+    return redirect('user_management')

@@ -1,11 +1,8 @@
 from django.urls import path
-from account.views import user_management
 from .views import *
 
 urlpatterns = [
     path('', bridge, name='bridge'),
-    #User management
-    path('user_management/', user_management, name='user_management'),
     #Volume
     path('volume_page/<int:journal_id>/', volume_page, name='volume_page'),
     path('add_volume/', add_volume, name='add_volume'),
