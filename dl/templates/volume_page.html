@@ -119,63 +119,77 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('#addVolumeButton').click(function() {
-            $('#volumeModalLabel').text('Add Volume');
-            $('#volumeId').val('');
-            $('#volumeField').val('');
-            $('#descriptionField').val('');
-            $('#yearField').val('');
-            $('#volumeModal').modal('show');
-        });
-    
-        $('.editVolumeButton').click(function() {
-            var row = $(this).closest('tr');
-            var id = row.data('id');
-            var volume = row.find('td').eq(0).text();
-            var description = row.find('td').eq(1).text();
-            var year = row.find('td').eq(2).text();
-    
-            $('#volumeModalLabel').text('Edit Volume');
-            $('#volumeId').val(id);
-            $('#volumeField').val(volume);
-            $('#descriptionField').val(description);
-            $('#yearField').val(year);
-            $('#volumeModal').modal('show');
-        });
-    
-        $('#volumeForm').submit(function(e) {
-            e.preventDefault();
-    
-            var id = $('#volumeId').val();
-            var volume = $('#volumeField').val();
-            var description = $('#descriptionField').val();
-            var year = $('#yearField').val();
-            var journalId = "{{ journal.id }}";  // Include the journal ID in the data
-    
-    
-            $.ajax({
-                url: id ? "{% url 'edit_volume' %}" : "{% url 'add_volume' %}",
-                type: 'POST',
-                data: {
-                    'id': id,
-                    'volume': volume,
-                    'description': description,
-                    'year': year,
-                    'journal_id': journalId,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('An error occurred.');
-                    }
-                    $('#volumeModal').modal('hide');
+$(document).ready(function() {
+    $('#addVolumeButton').click(function() {
+        // Fetch the first row's volume and year
+        var firstRow = $('#volumeTableBody tr:first-child');
+        var volume = firstRow.find('td').eq(0).text();
+        var year = firstRow.find('td').eq(2).text();
+
+        // If there is no first row or the table is empty, set default values
+        if (!volume || !year) {
+            volume = '1'; // or any default value
+            year = new Date().getFullYear(); // current year
+        } else {
+            // Increment the volume and year if valid numbers
+            volume = parseInt(volume) + 1;
+            year = parseInt(year) + 1;
+        }
+
+        $('#volumeModalLabel').text('Add Volume');
+        $('#volumeId').val('');
+        $('#volumeField').val(volume);
+        $('#descriptionField').val('');
+        $('#yearField').val(year);
+        $('#volumeModal').modal('show');
+    });
+
+    $('.editVolumeButton').click(function() {
+        var row = $(this).closest('tr');
+        var id = row.data('id');
+        var volume = row.find('td').eq(0).text();
+        var description = row.find('td').eq(1).text();
+        var year = row.find('td').eq(2).text();
+
+        $('#volumeModalLabel').text('Edit Volume');
+        $('#volumeId').val(id);
+        $('#volumeField').val(volume);
+        $('#descriptionField').val(description);
+        $('#yearField').val(year);
+        $('#volumeModal').modal('show');
+    });
+
+    $('#volumeForm').submit(function(e) {
+        e.preventDefault();
+
+        var id = $('#volumeId').val();
+        var volume = $('#volumeField').val();
+        var description = $('#descriptionField').val();
+        var year = $('#yearField').val();
+        var journalId = "{{ journal.id }}";  // Include the journal ID in the data
+
+        $.ajax({
+            url: id ? "{% url 'edit_volume' %}" : "{% url 'add_volume' %}",
+            type: 'POST',
+            data: {
+                'id': id,
+                'volume': volume,
+                'description': description,
+                'year': year,
+                'journal_id': journalId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('An error occurred.');
                 }
-            });
+                $('#volumeModal').modal('hide');
+            }
         });
-    });   
+    });
+});
 </script>
 {% endblock content %}
 

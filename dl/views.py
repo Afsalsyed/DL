@@ -29,11 +29,26 @@ def bridge(request):
 def volume_page(request, journal_id):
     journal = get_object_or_404(Journal, id=journal_id)
     volumes = Volume.objects.filter(journal=journal).order_by('-id')
+    latest_issue = Issue.objects.filter(volume__journal=journal).order_by('-id').first()
+    latest_year = volumes.first().year if volumes.exists() else None
+
     context = {
         'journal': journal,
         'volumes': volumes,
+        'latest_issue': latest_issue,
+        'latest_year': latest_year,
     }
     return render(request, 'volume_page.html', context)
+
+
+# def volume_page(request, journal_id):
+#     journal = get_object_or_404(Journal, id=journal_id)
+#     volumes = Volume.objects.filter(journal=journal).order_by('-id')
+#     context = {
+#         'journal': journal,
+#         'volumes': volumes,
+#     }
+#     return render(request, 'volume_page.html', context)
 
 def add_volume(request):
     if request.method == 'POST':
@@ -73,32 +88,43 @@ def issue_list(request, journal_id):
 
 
 
-
 def save_issue(request):
     if request.method == 'POST':
         issue_id = request.POST.get('issueId')
-        form = IssueForm(request.POST)
+        issue_text = request.POST.get('issue')
+        volume_id = request.POST.get('volume')
+        description = request.POST.get('description')
 
-        if form.is_valid():
-            if issue_id:  # Update existing issue
-                issue = Issue.objects.get(id=issue_id)
-                form = IssueForm(request.POST, instance=issue)
-            else:  # Create new issue
-                issue = form.save(commit=False)
+        if not issue_text or not volume_id or not description:
+            return JsonResponse({'success': False, 'error': 'All fields are required'})
 
-            issue = form.save()
+        try:
+            volume = Volume.objects.get(id=volume_id)
+        except Volume.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Volume not found'})
 
-            return JsonResponse({
-                'success': True,
-                'issue': {
-                    'id': issue.id,
-                    'issue': issue.issue,
-                    'volume': issue.volume.volume,
-                    'description': issue.description,
-                }
-            })
+        if issue_id:  # Update existing issue
+            issue = get_object_or_404(Issue, id=issue_id)
+            issue.issue = issue_text
+            issue.volume = volume
+            issue.description = description
+        else:  # Create new issue
+            issue = Issue(issue=issue_text, volume=volume, description=description)
 
-    return JsonResponse({'success': False, 'error': 'Invalid form data'})
+        issue.save()
+
+        return JsonResponse({
+            'success': True,
+            'issue': {
+                'id': issue.id,
+                'issue': issue.issue,
+                'volume_id': issue.volume.id,
+                'volume': issue.volume.volume,
+                'description': issue.description,
+            }
+        })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 
 
@@ -121,14 +147,14 @@ def publish_article(request):
     if request.method == 'POST':
         print(request.POST)
         acceptedSubmission_id = request.POST.get('accepted_submission_id')
-        issue_id = request.POST.get('issue_id')
+        issue = request.POST.get('issue_id')
         published_on = request.POST.get('published_on')
 
         accepted_submission = Accepted_Submission.objects.get(id=acceptedSubmission_id)
         
         published_article = Published_article.objects.create(
             accepted_submission=accepted_submission,
-            issue=issue_id,
+            issue_id=issue,
             published_on_date=published_on,
             doi='your-doi-here'  # You can generate or assign a DOI as needed
         )
@@ -137,3 +163,5 @@ def publish_article(request):
         return JsonResponse({'success': True, 'message': 'Article published successfully!'})
     
     return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
+     

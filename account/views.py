@@ -387,3 +387,22 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+
+
+#*************************************************
+
+from dl.models import Published_article, Issue
+
+def index_view(request):
+    journals = Journal.objects.all()  # Fetch all journal entries
+    return render(request, 'index.html', {'journals': journals})
+
+def current_issue_view(request, journal_id):
+    journal = get_object_or_404(Journal, id=journal_id)
+    # Fetch the latest published submission for the journal
+    issue = Issue.objects.filter(volume__journal=journal).order_by('-id')
+    latest_issues = Published_article.objects.filter(issue__in= issue).order_by('-id')
+    print(latest_issues)
+    return render(request, 'current_issue.html', {'journal': journal, 'latest_issues': latest_issues})
+    

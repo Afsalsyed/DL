@@ -7,7 +7,7 @@ from oss.views import Draftview
 from dl.views import bridge
 
 urlpatterns = [
-    path('',register, name='register'),
+    path('register',register, name='register'),
     path('login/', login_view, name='login'),
     path('user_management/', user_management, name='user_management'),
     path('search-users/', search_users, name='search_users'),
@@ -35,6 +35,10 @@ urlpatterns = [
     #login redirect
     path('', Draftview, name='draft'),
     #dl
-    path('', bridge, name='bridge'),
+    path('bridge', bridge, name='bridge'),
+    #
+    path('index/', index_view, name='index'),
+    #current issues
+    path('journal/<int:journal_id>/', current_issue_view, name='current_issue'),
 ]
  

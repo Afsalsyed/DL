@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+    <!-- Banner Section Start -->
+    <div class="banner-style-two">
+        <div class="d-table">
+            <div class="d-table-cell">
+                <div class="container">
+                    <div class="banner-text">
+                        <h1>Where <br>Excellence Knows <br>No Bounds</h1>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua. Quis ipsum suspendisse.</p>
+                        <div class="theme-btn">
+                            <a href="job-details.html" class="default-btn">Know More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Banner Section End -->
+
+    <!-- Find Section Start -->
+    <div class="find-section pb-100">
+        <div class="container three-sections-wrap">
+            <div class="row justify-content-center">
+                {% for journal in journals %}
+                    <div class="col-lg-4">
+                        <div class="jcs-wrap">
+                            <h2 align= center><a href="{% url 'current_issue' journal.id %}">{{ journal.title }}</a></h2>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-lg-4">
+                        <div class="jcs-wrap">
+                            <h2>No Journal Entries Available</h2>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
